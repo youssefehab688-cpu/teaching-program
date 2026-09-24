@@ -1,17 +1,40 @@
-import './globals.css';
-import Navigation from '../components/Navigation';
+import type { Metadata, Viewport } from "next";
+import "./globals.css";
+import BottomNav from "../components/BottomNav";
 
-export const metadata = {
-  title: 'TutorPulse',
-  description: 'Time-Aware Tutor Schedule',
+export const metadata: Metadata = {
+  title: "لوحة المتابعة",
+  description: "إدارة جدول الحصص والاشتراكات الشهرية للطلاب",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "لوحة المتابعة",
+  },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export const viewport: Viewport = {
+  themeColor: "#09090b",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false, // لمنع التكبير العرضي أثناء لمس التابلت ليعطي إحساس التطبيق الأصلي
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en">
-      <body className="bg-neutral-50 text-neutral-900 min-h-screen antialiased pb-20">
+    <html lang="ar" dir="rtl">
+      <head>
+        <link rel="icon" href="/icon-192.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+      </head>
+      <body className="bg-zinc-950 text-zinc-100 min-h-screen antialiased selection:bg-indigo-500 selection:text-white">
         {children}
-        <Navigation />
+        <BottomNav />
       </body>
     </html>
   );

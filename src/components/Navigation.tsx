@@ -1,39 +1,36 @@
 'use client';
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, CalendarDays, CreditCard } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, WalletCards } from 'lucide-react';
 
-export default function Navigation() {
+export default function BottomNav() {
   const pathname = usePathname();
 
-  const navItems = [
-    { label: 'Dashboard', href: '/', icon: LayoutDashboard },
-    { label: 'Schedule', href: '/schedule', icon: CalendarDays },
-    { label: 'Payments', href: '/payments', icon: CreditCard },
+  const links = [
+    { href: '/', label: 'الرئيسية', icon: LayoutDashboard },
+    { href: '/schedule', label: 'الجدول', icon: CalendarDays },
+    { href: '/payments', label: 'الاشتراكات', icon: WalletCards },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-t border-neutral-200 safe-area-pb">
-      <div className="max-w-md mx-auto flex justify-around items-center h-16 px-4">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href;
-
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex flex-col items-center justify-center w-16 py-1 text-xs font-medium transition-colors ${
-                isActive ? 'text-blue-600' : 'text-neutral-500 hover:text-neutral-900'
-              }`}
-            >
-              <Icon className={`w-5 h-5 mb-1 ${isActive ? 'stroke-[2.5]' : 'stroke-[1.75]'}`} />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
-      </div>
+    <nav className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-zinc-900/80 backdrop-blur-xl border border-zinc-800/80 px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-3">
+      {links.map(({ href, label, icon: Icon }) => {
+        const isActive = pathname === href;
+        return (
+          <Link
+            key={href}
+            href={href}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+              isActive
+                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
+                : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50'
+            }`}
+          >
+            <Icon size={18} />
+            <span>{label}</span>
+          </Link>
+        );
+      })}
     </nav>
   );
 }
