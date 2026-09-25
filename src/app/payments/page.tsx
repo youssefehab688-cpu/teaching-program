@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import * as XLSX from 'xlsx';
+import { FileSpreadsheet, Printer } from 'lucide-react';
+
 import { 
   WalletCards, 
   CheckCircle2, 
@@ -428,6 +431,43 @@ export default function PaymentsPage() {
 
     return matchesSearch && matchesStatus && matchesGroup;
   });
+  // --- دالتا تصدير Excel و PDF ---
+  const handleExportExcel = () => {
+    // نستخدم مصفوفة الاشتراكات المفلترة المعروضة حالياً
+    const listToExport = typeof filteredPayments !== 'undefined' ? filteredPayments : payments;
+    if (!listToExport || listToExport.length === 0) {
+      alert('لا توجد بيانات للاشتراكات في هذا الشهر لتصديرها!');
+      return;
+    }
+
+    const data = listToExport.map((p: any, index: number) => ({
+      'م': index + 1,
+      'اسم الطالب': p.students?.full_name || 'غير محدد',
+      'المجموعة': p.students?.groups?.name || 'عام',
+      'المادة': p.students?.groups?.subject || '',
+      'رقم ولي الأمر': p.students?.parent_phone || '-',
+      'المبلغ المطلوب (ج.م)': p.expected_amount || 0,
+      'المبلغ المدفوع (ج.م)': p.paid_amount || (p.status === 'PAID' ? p.expected_amount : 0),
+      'حالة السداد': p.status === 'PAID' ? 'تم الدفع' : 'معلق',
+      'تاريخ السداد': p.paid_at ? new Date(p.paid_at).toLocaleDateString('ar-EG') : 'لم يسدد',
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    worksheet['!views'] = [{ RTL: true }];
+    worksheet['!cols'] = [
+      { wch: 6 }, { wch: 25 }, { wch: 18 }, { wch: 14 },
+      { wch: 16 }, { wch: 18 }, { wch: 18 }, { wch: 14 }, { wch: 16 }
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'الاشتراكات');
+    XLSX.writeFile(workbook, `كشف_اشتراكات_${selectedMonth || 'الشهر'}.xlsx`);
+  };
+
+  const handleExportPDF = () => {
+    window.print();
+  };
+  // -----------------------------
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 pb-32 pt-8 px-4 sm:px-6 max-w-4xl mx-auto">
@@ -435,6 +475,28 @@ export default function PaymentsPage() {
       {/* الترويسة الرئيسية */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
+          <div className="flex items-center gap-2 print:hidden">
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              className="flex items-center gap-1.5 px-3 py-2 bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-400 border border-emerald-500/20 rounded-xl text-xs font-semibold transition active:scale-95 shadow-sm"
+              title="تصدير كشف إكسل"
+            >
+              <FileSpreadsheet size={16} />
+              <span>تصدير Excel</span>
+            </button>
+            
+            <button
+              type="button"
+              onClick={handleExportPDF}
+              className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 rounded-xl text-xs font-semibold transition active:scale-95 shadow-sm"
+              title="طباعة أو حفظ PDF"
+            >
+              <Printer size={16} />
+              <span>طباعة / PDF</span>
+            </button>
+          </div>
+
           <div className="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-1">
             <WalletCards size={16} />
             <span>الماليات والتحصيل</span>
